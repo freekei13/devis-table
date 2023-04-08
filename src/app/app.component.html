@@ -1,0 +1,146 @@
+<div class="title">
+  <h1>Test de Recrutement EVA</h1>
+</div>
+<div class="flexTable">
+  <table class="table1">
+    <ng-container>
+      <tr>
+        <th></th>
+        <th class="headT" width="50%"><h3>Designation</h3></th>
+        <th class="headT" width="10%"><h3>Qte</h3></th>
+        <th class="headT" width="10%"><h3>Unite</h3></th>
+        <th class="headT" width="10%"><h3>PU</h3></th>
+        <th class="headT" width="10%"><h3>Total</h3></th>
+        <th></th>
+      </tr>
+    </ng-container>
+  
+    <!-- Afficher quand le tableau est vide -->
+    <ng-container>
+      <tr class="emptyBox" *ngIf="isEmpty">
+        <td></td>
+        <th>Groupe principal à ajouter</th>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>  
+    </ng-container>
+    
+    <!-- Afficher les groupes principal -->
+    <ng-container *ngFor="let mr of datasource; let i = index">
+      <tr>
+        <td>
+          <button class="addButton" [disabled]="isPressed" (click)="subOrRow(i); isPress()">+</button>
+          <div class="choiceButtons">
+            <button *ngIf="mr.rowChoice" (click)="addSub(i); isPress()">+ Sous-groupe de chiffrage</button><br>
+            <button *ngIf="mr.rowChoice" (click)="addRowSub(i); isPress()">+ Ligne de chiffrage</button>
+          </div>
+        </td> <!-- bouton pour ajouter un sous-groupe -->
+        <td class="textStart mainrow"><h3>{{mr.name}}</h3></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td class="mainrow"><h3>{{mr.total}}</h3></td>
+        <td><button class="removeButton" [disabled]="isPressed" (click)="mainRemove(i); allSum()">-</button></td> <!-- bouton pour supprimer un groupe principal -->
+      </tr>
+  
+      <!-- Afficher les sous-groupes -->
+      <ng-container *ngFor="let sr of mr.sub; let s = index">
+        <tr>
+          <td></td> <!-- bouton pour ajouter une ligne de chiffrage -->
+          <td>
+            <div class="flexButton">
+              <button *ngIf="!sr.isRow" class="subButton" [disabled]="isPressed" (click)="addRow(i, s); isPress()">+</button>
+              <h4 *ngIf="!sr.isRow" class="textStart subrow">{{sr.name}}</h4>
+              <li *ngIf="sr.isRow" class="textStart subrow">{{sr.name}}</li>
+            </div>
+          </td>
+          <td><div *ngIf="sr.isRow" class="subrow" style="width:auto;"><input [disabled]="addPressed" type="number" [(ngModel)]="sr.quantity" (ngModelChange)="rowSum(sr); mainSum(mr); allSum()"></div></td>
+          <td><div *ngIf="sr.isRow" class="subrow" style="width:auto;"><input [disabled]="addPressed" type="text" [(ngModel)]="sr.unity"></div></td>
+          <td><div *ngIf="sr.isRow" class="subrow" style="width:auto;"><input [disabled]="addPressed" type="number" [(ngModel)]="sr.pu" (ngModelChange)="rowSum(sr); ; mainSum(mr); allSum()"></div></td>
+          <td><div class="subrow" style="width: auto;">{{sr.total}}</div></td>
+          <td><button class="removeButton" [disabled]="isPressed" (click)="subRemove(i, s); mainSum(mr); allSum()">-</button></td> <!-- bouton pour supprimer un sous-groupe -->
+        </tr>
+  
+        <!-- input pour nommer un sous-groupe -->
+        <tr *ngIf="datasource[i].sub[s].isSubPress">
+          <td></td>
+          <div class="mainName">
+            <input style="width: 90%;" type="text" name="sname{{s}}" [(ngModel)]="sr.name">
+            <div class="buttons">
+              <button (click)="subConf(i)">Confirmer</button>
+              <button (click)="subCanc(i)">Annuler</button>
+            </div>
+          </div>
+        </tr>
+  
+        <!-- Afficher les lignes de chiffrages -->
+        <ng-container *ngFor="let r of sr.sub; let t = index">
+          <tr>
+            <td></td>
+            <td><li class="textStart row">{{r.name}}</li></td>
+            <td><div class="row" style="width:auto;"><input [disabled]="addPressed" type="number" [(ngModel)]="r.quantity" (ngModelChange)="rowSum(r); subSum(sr, sr.sub); mainSum(mr); allSum()"></div></td>
+            <td><div class="row" style="width:auto;"><input [disabled]="addPressed" type="text" [(ngModel)]="r.unity"></div></td>
+            <td><div class="row" style="width:auto;"><input [disabled]="addPressed" type="number" [(ngModel)]="r.pu" (ngModelChange)="rowSum(r); subSum(sr, sr.sub); mainSum(mr); allSum()"></div></td>
+            <td><div class="row" style="width:auto;">{{r.total}}</div></td>
+            <td><button class="removeButton" [disabled]="isPressed" (click)="rowRemove(i, s, t); subSum(sr, sr.sub); mainSum(mr); allSum()">-</button></td> <!-- bouton pour supprimer un groupe de chiffrage -->
+          </tr>
+  
+          <!-- Input pour nommer une ligne de chiffrage -->
+          <tr *ngIf="datasource[i].sub[s].sub[t].isRowPress">
+            <td></td>
+            <div class="mainName">
+              <input style="width: 85%;" type="text" name="sname{{t}}" [(ngModel)]="r.name" placeholder="Nommer le groupe de chiffrage">
+              <div class="buttons">
+                <button (click)="rowConf(i, s)">Confirmer</button>
+                <button (click)="rowCanc(i, s)">Annuler</button>
+              </div>
+            </div>
+          </tr>
+        </ng-container>
+      </ng-container>
+  
+      <!-- input pour nommer un groupe principal -->
+      <tr *ngIf="datasource[i].isMainPress">
+        <td></td>
+        <div class="mainName">
+          <input [(ngModel)]="mr.name" type="text" name="mname{{i}}" placeholder="Nommer le groupe principal">
+          <div class="buttons">
+            <button (click)="mainConf()">Confirmer</button>
+            <button (click)="mainCanc()">Annuler</button>     
+          </div>
+        </div>
+      </tr>
+    </ng-container>  
+    <tr>
+      <td></td>
+      <td><!-- Bouton pour ajouter un groupe principal -->
+        <button [disabled]="isPressed" class="buttonMain addButton" (click)="addMain(); isPress()">+ Groupe de chiffrage principal</button></td>
+    </tr>
+  </table>
+  <table class="table2">
+    <!--Afficher le montant total brut HT et TVA et net TTC arrondi  -->
+    <ng-container *ngFor="let at of totals; let t = index">
+      <tfoot>
+        <tr>
+          <td><h3 class="total">Le montant total brut HT</h3></td>
+          <td><h3 class="total">{{totals[t].brutTotal}}</h3></td>
+        </tr>
+        <tr>
+          <td><h4 class="total"><input [disabled]="addPressed" class="ngInput" style="width: 10%;" type="number" [(ngModel)]="totals[t].tva" (ngModelChange)="allSum()">% TVA</h4></td>
+          <td><h4 class="total">{{totals[t].tvaMontant}}</h4></td>
+        </tr>
+        <tr>
+          <td><h3 class="total">Le montant total NET TTC</h3></td>
+          <td><h3 class="total" style="border: 3px solid;">{{totals[t].netTotal}}</h3></td>
+        </tr>
+      </tfoot>
+    </ng-container>
+  </table>
+</div>
+
+  
+  
+
